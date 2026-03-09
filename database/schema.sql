@@ -1,0 +1,231 @@
+IF DB_ID('InventoryManagementDB') IS NULL
+BEGIN
+  CREATE DATABASE InventoryManagementDB;
+END;
+GO
+
+USE InventoryManagementDB;
+GO
+
+CREATE TABLE Roles (
+  RoleId INT IDENTITY(1,1) PRIMARY KEY,
+  RoleName NVARCHAR(100) NOT NULL UNIQUE,
+  Description NVARCHAR(255) NULL,
+  CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+);
+GO
+
+CREATE TABLE Permissions (
+  PermissionId INT IDENTITY(1,1) PRIMARY KEY,
+  PermissionKey NVARCHAR(120) NOT NULL UNIQUE,
+  ModuleName NVARCHAR(120) NOT NULL,
+  ActionName NVARCHAR(80) NOT NULL,
+  CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+);
+GO
+
+CREATE TABLE Users (
+  UserId INT IDENTITY(1,1) PRIMARY KEY,
+  FullName NVARCHAR(150) NOT NULL,
+  Email NVARCHAR(160) NOT NULL UNIQUE,
+  PasswordHash NVARCHAR(255) NOT NULL,
+  IsActive BIT NOT NULL DEFAULT 1,
+  CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+);
+GO
+
+CREATE TABLE UserRoles (
+  UserId INT NOT NULL,
+  RoleId INT NOT NULL,
+  AssignedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+  PRIMARY KEY (UserId, RoleId),
+  FOREIGN KEY (UserId) REFERENCES Users(UserId),
+  FOREIGN KEY (RoleId) REFERENCES Roles(RoleId)
+);
+GO
+
+CREATE TABLE RolePermissions (
+  RoleId INT NOT NULL,
+  PermissionId INT NOT NULL,
+  AssignedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+  PRIMARY KEY (RoleId, PermissionId),
+  FOREIGN KEY (RoleId) REFERENCES Roles(RoleId),
+  FOREIGN KEY (PermissionId) REFERENCES Permissions(PermissionId)
+);
+GO
+
+CREATE TABLE Categories (
+  CategoryId INT IDENTITY(1,1) PRIMARY KEY,
+  CategoryName NVARCHAR(120) NOT NULL UNIQUE,
+  Description NVARCHAR(255) NULL,
+  CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+);
+GO
+
+CREATE TABLE Suppliers (
+  SupplierId INT IDENTITY(1,1) PRIMARY KEY,
+  SupplierName NVARCHAR(150) NOT NULL,
+  ContactPerson NVARCHAR(120) NULL,
+  Email NVARCHAR(160) NULL,
+  Phone NVARCHAR(40) NULL,
+  AddressLine NVARCHAR(255) NULL,
+  CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+);
+GO
+
+CREATE TABLE Warehouses (
+  WarehouseId INT IDENTITY(1,1) PRIMARY KEY,
+  WarehouseCode NVARCHAR(30) NOT NULL UNIQUE,
+  WarehouseName NVARCHAR(150) NOT NULL,
+  Location NVARCHAR(200) NOT NULL,
+  CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+);
+GO
+
+CREATE TABLE Products (
+  ProductId INT IDENTITY(1,1) PRIMARY KEY,
+  SKU NVARCHAR(80) NOT NULL UNIQUE,
+  ProductName NVARCHAR(180) NOT NULL,
+  CategoryId INT NOT NULL,
+  SupplierId INT NULL,
+  UnitPrice DECIMAL(18,2) NOT NULL,
+  ReorderLevel INT NOT NULL DEFAULT 0,
+  IsActive BIT NOT NULL DEFAULT 1,
+  CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+  FOREIGN KEY (CategoryId) REFERENCES Categories(CategoryId),
+  FOREIGN KEY (SupplierId) REFERENCES Suppliers(SupplierId)
+);
+GO
+
+CREATE TABLE Inventory (
+  InventoryId INT IDENTITY(1,1) PRIMARY KEY,
+  WarehouseId INT NOT NULL,
+  ProductId INT NOT NULL,
+  QuantityOnHand INT NOT NULL DEFAULT 0,
+  LastUpdated DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+  UNIQUE (WarehouseId, ProductId),
+  FOREIGN KEY (WarehouseId) REFERENCES Warehouses(WarehouseId),
+  FOREIGN KEY (ProductId) REFERENCES Products(ProductId)
+);
+GO
+
+CREATE TABLE InventoryTransactions (
+  TransactionId INT IDENTITY(1,1) PRIMARY KEY,
+  WarehouseId INT NOT NULL,
+  ProductId INT NOT NULL,
+  TransactionType NVARCHAR(50) NOT NULL,
+  Quantity INT NOT NULL,
+  ReferenceType NVARCHAR(60) NOT NULL,
+  ReferenceId INT NULL,
+  Notes NVARCHAR(255) NULL,
+  CreatedBy INT NULL,
+  CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+  FOREIGN KEY (WarehouseId) REFERENCES Warehouses(WarehouseId),
+  FOREIGN KEY (ProductId) REFERENCES Products(ProductId),
+  FOREIGN KEY (CreatedBy) REFERENCES Users(UserId)
+);
+GO
+
+CREATE TABLE PurchaseOrders (
+  PurchaseOrderId INT IDENTITY(1,1) PRIMARY KEY,
+  PONumber NVARCHAR(40) NOT NULL UNIQUE,
+  SupplierId INT NOT NULL,
+  WarehouseId INT NOT NULL,
+  OrderDate DATE NOT NULL,
+  ExpectedDate DATE NULL,
+  Status NVARCHAR(40) NOT NULL,
+  Notes NVARCHAR(255) NULL,
+  CreatedBy INT NOT NULL,
+  CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+  FOREIGN KEY (SupplierId) REFERENCES Suppliers(SupplierId),
+  FOREIGN KEY (WarehouseId) REFERENCES Warehouses(WarehouseId),
+  FOREIGN KEY (CreatedBy) REFERENCES Users(UserId)
+);
+GO
+
+CREATE TABLE PurchaseOrderDetails (
+  PurchaseOrderDetailId INT IDENTITY(1,1) PRIMARY KEY,
+  PurchaseOrderId INT NOT NULL,
+  ProductId INT NOT NULL,
+  OrderedQty INT NOT NULL,
+  ReceivedQty INT NOT NULL DEFAULT 0,
+  UnitCost DECIMAL(18,2) NOT NULL,
+  FOREIGN KEY (PurchaseOrderId) REFERENCES PurchaseOrders(PurchaseOrderId),
+  FOREIGN KEY (ProductId) REFERENCES Products(ProductId)
+);
+GO
+
+CREATE TABLE Customers (
+  CustomerId INT IDENTITY(1,1) PRIMARY KEY,
+  CustomerName NVARCHAR(180) NOT NULL,
+  Email NVARCHAR(160) NULL,
+  Phone NVARCHAR(40) NULL,
+  BillingAddress NVARCHAR(255) NULL,
+  ShippingAddress NVARCHAR(255) NULL,
+  CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+);
+GO
+
+CREATE TABLE SalesOrders (
+  SalesOrderId INT IDENTITY(1,1) PRIMARY KEY,
+  SONumber NVARCHAR(40) NOT NULL UNIQUE,
+  CustomerId INT NOT NULL,
+  WarehouseId INT NOT NULL,
+  OrderDate DATE NOT NULL,
+  Status NVARCHAR(40) NOT NULL,
+  CreatedBy INT NOT NULL,
+  CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+  FOREIGN KEY (CustomerId) REFERENCES Customers(CustomerId),
+  FOREIGN KEY (WarehouseId) REFERENCES Warehouses(WarehouseId),
+  FOREIGN KEY (CreatedBy) REFERENCES Users(UserId)
+);
+GO
+
+CREATE TABLE SalesOrderDetails (
+  SalesOrderDetailId INT IDENTITY(1,1) PRIMARY KEY,
+  SalesOrderId INT NOT NULL,
+  ProductId INT NOT NULL,
+  Quantity INT NOT NULL,
+  UnitPrice DECIMAL(18,2) NOT NULL,
+  FOREIGN KEY (SalesOrderId) REFERENCES SalesOrders(SalesOrderId),
+  FOREIGN KEY (ProductId) REFERENCES Products(ProductId)
+);
+GO
+
+CREATE TABLE Deliveries (
+  DeliveryId INT IDENTITY(1,1) PRIMARY KEY,
+  SalesOrderId INT NOT NULL,
+  DeliveryNumber NVARCHAR(40) NOT NULL UNIQUE,
+  DeliveryDate DATE NULL,
+  Status NVARCHAR(40) NOT NULL,
+  Notes NVARCHAR(255) NULL,
+  CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+  FOREIGN KEY (SalesOrderId) REFERENCES SalesOrders(SalesOrderId)
+);
+GO
+
+CREATE TABLE Invoices (
+  InvoiceId INT IDENTITY(1,1) PRIMARY KEY,
+  SalesOrderId INT NOT NULL UNIQUE,
+  InvoiceNumber NVARCHAR(40) NOT NULL UNIQUE,
+  InvoiceDate DATE NOT NULL,
+  TotalAmount DECIMAL(18,2) NOT NULL,
+  PaidAmount DECIMAL(18,2) NOT NULL DEFAULT 0,
+  Status NVARCHAR(40) NOT NULL,
+  CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+  FOREIGN KEY (SalesOrderId) REFERENCES SalesOrders(SalesOrderId)
+);
+GO
+
+CREATE TABLE Payments (
+  PaymentId INT IDENTITY(1,1) PRIMARY KEY,
+  InvoiceId INT NOT NULL,
+  PaymentDate DATE NOT NULL,
+  Amount DECIMAL(18,2) NOT NULL,
+  PaymentMethod NVARCHAR(40) NOT NULL,
+  ReferenceNumber NVARCHAR(80) NULL,
+  Notes NVARCHAR(255) NULL,
+  CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+  FOREIGN KEY (InvoiceId) REFERENCES Invoices(InvoiceId)
+);
+GO
