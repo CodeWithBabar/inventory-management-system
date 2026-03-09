@@ -1,28 +1,33 @@
 const sql = require('mssql');
 
 const config = {
+  server: process.env.DB_SERVER,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  server: process.env.DB_SERVER,
   database: process.env.DB_NAME,
+  port: Number(process.env.DB_PORT || 1433),
   options: {
     encrypt: process.env.DB_ENCRYPT === 'true',
-    trustServerCertificate: process.env.DB_TRUST_SERVER_CERT === 'true'
-  },
-  pool: {
-    max: 10,
-    min: 0,
-    idleTimeoutMillis: 30000
+    trustServerCertificate: process.env.DB_TRUST_CERT === 'true'
   }
 };
 
-let poolPromise;
+let pool;
 
-const getPool = async () => {
-  if (!poolPromise) {
-    poolPromise = sql.connect(config);
-  }
-  return poolPromise;
+const connectToDatabase = async () => {
+  pool = await sql.connect(config);
+  return pool;
 };
 
-module.exports = { sql, getPool };
+const getPool = () => {
+  if (!pool) {
+    throw new Error('Database pool not initialized. Call connectToDatabase first.');
+  }
+  return pool;
+};
+
+module.exports = {
+  sql,
+  connectToDatabase,
+  getPool
+};
