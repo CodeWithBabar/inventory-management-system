@@ -1,18 +1,28 @@
 {
-  "name": "inventory-server",
+  "name": "inventory-management-server",
   "version": "1.0.0",
-  "type": "module",
-  "main": "src/index.js",
+  "description": "Backend API for Inventory Management System",
+  "main": "src/server.js",
   "scripts": {
-    "dev": "nodemon src/index.js",
-    "start": "node src/index.js"
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js"
   },
+  "keywords": [
+    "inventory",
+    "express",
+    "mssql",
+    "jwt"
+  ],
+  "author": "",
+  "license": "MIT",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
     "mssql": "^11.0.1"
   },
   "devDependencies": {

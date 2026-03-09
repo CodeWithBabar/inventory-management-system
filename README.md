@@ -1,135 +1,113 @@
-# Inventory Management System (Semester Demo Ready)
+# Inventory Management System (Phase 1 Scaffold)
 
-Full-stack Inventory Management System scaffold with React frontend, Express backend, and SQL Server schema/seed scripts.
+A full-stack Inventory Management System scaffold built for semester-project-grade development.
 
-## Project Structure
+## Tech Stack
+- **Frontend:** React + JavaScript + Vite
+- **Backend:** Node.js + Express.js
+- **Database:** Microsoft SQL Server
+- **Authentication:** JWT
+- **API Style:** REST
+- **Package Manager:** npm
 
-- `client` - React + Vite admin UI (dashboard, auth flow, printable invoice page)
-- `server` - Node.js + Express REST API (JWT auth, dashboard summary, invoice endpoint)
-- `database` - SQL Server schema and seed data
-- `.env.example` - combined environment template
+## Folder Structure
 
-## Features Included
-
-- JWT login with role payload
-- Protected frontend routes
-- Dashboard cards + sample charts (Recharts)
-- Invoice details page with print button and print CSS
-- SQL schema containing all required semester project tables
-- Seed data and demo users
-
----
-
-## 1) SQL Server Database Initialization
-
-### Prerequisites
-- SQL Server running locally or reachable over network
-- SQL Server Management Studio (SSMS) or `sqlcmd`
-
-### Option A: SSMS
-1. Open SSMS and connect to your SQL Server instance.
-2. Open `database/schema.sql` and execute it.
-3. Open `database/seed.sql` and execute it.
-
-### Option B: `sqlcmd`
-```bash
-sqlcmd -S localhost,1433 -U sa -P "YourStrong!Passw0rd" -i database/schema.sql
-sqlcmd -S localhost,1433 -U sa -P "YourStrong!Passw0rd" -i database/seed.sql
+```text
+inventory-management-system/
+├── client/
+├── server/
+├── database/
+├── .env.example
+└── README.md
 ```
 
----
+## Implemented in Phase 1
 
-## 2) Backend Setup (Server)
+- Full project folder structure for frontend, backend, and database
+- Frontend scaffold with routing, protected routes, sidebar, topbar, dashboard cards, and module placeholders
+- Backend scaffold with Express app, modular routes/controllers/middleware, JWT auth middleware, DB connector, and error handling
+- SQL Server schema with all required tables and relationships
+- Seed data for roles, permissions, users, modules, stock, purchase/sales, invoice, and payments
+- Environment template files for root, frontend, and backend
+
+## Demo Credentials
+
+Use these demo users after running seed script:
+
+- **Admin:** `admin@ims.local` / `Admin@123`
+- **Inventory:** `inventory@ims.local` / `Inventory@123`
+- **Sales:** `sales@ims.local` / `Sales@123`
+
+## Setup Instructions
+
+## 1) Clone and Enter Project
+
+```bash
+git clone <your-repo-url>
+cd inventory-management-system
+```
+
+## 2) Setup SQL Server Database
+
+1. Ensure SQL Server is running.
+2. Create or use a login/user with permission to create DB objects.
+3. Run schema script:
+
+```bash
+sqlcmd -S localhost -U sa -P "YourStrong@Passw0rd" -i database/schema.sql
+```
+
+4. Run seed script:
+
+```bash
+sqlcmd -S localhost -U sa -P "YourStrong@Passw0rd" -i database/seed.sql
+```
+
+## 3) Setup Backend
 
 ```bash
 cd server
-npm install
 cp .env.example .env
-```
-
-Update `.env` values as needed:
-
-```env
-PORT=5000
-JWT_SECRET=change_me_to_a_strong_secret
-DB_SERVER=localhost
-DB_PORT=1433
-DB_USER=sa
-DB_PASSWORD=YourStrong!Passw0rd
-DB_NAME=InventoryDB
-DB_ENCRYPT=false
-DB_TRUST_SERVER_CERT=true
-```
-
-Run server:
-
-```bash
+npm install
 npm run dev
 ```
 
-Health check:
+Backend URL:
+- `http://localhost:5000`
+- Health check: `http://localhost:5000/health`
 
-```bash
-curl http://localhost:5000/health
-```
+## 4) Setup Frontend
 
----
-
-## 3) Frontend Setup (Client)
+Open a second terminal:
 
 ```bash
 cd client
-npm install
 cp .env.example .env
-```
-
-Ensure `.env`:
-
-```env
-VITE_API_BASE_URL=http://localhost:5000/api
-```
-
-Run frontend:
-
-```bash
+npm install
 npm run dev
 ```
 
-Open http://localhost:5173
+Frontend URL:
+- `http://localhost:5173`
 
----
+## 5) Verify Basic Flow
 
-## 4) Demo Credentials
+1. Open frontend URL.
+2. Login using demo credentials.
+3. Navigate dashboard and module placeholders.
+4. (Optional) Call API endpoints:
+   - `POST /api/v1/auth/login`
+   - `GET /api/v1/modules` (with Bearer token)
 
-- **Admin**: `admin@inventory.local` / `Admin@123`
-- **Manager**: `manager@inventory.local` / `Manager@123`
+## API Endpoints Available in Phase 1
 
----
+- `GET /health`
+- `POST /api/v1/auth/login`
+- `GET /api/v1/auth/me`
+- `GET /api/v1/modules`
 
-## 5) API Route Map (Frontend/Backend Consistency)
+## Notes
 
-- `POST /api/auth/login`
-- `GET /api/dashboard/summary`
-- `GET /api/invoices/:id`
-
-These are the routes used by the current client build.
-
----
-
-## 6) Semester Demo Checklist
-
-- ✅ Login and token-protected navigation
-- ✅ Dashboard KPI cards
-- ✅ Dashboard charts
-- ✅ Printable invoice page
-- ✅ Required SQL table set present
-- ✅ Seed and demo credentials provided
-
-## Remaining TODOs (for production-grade expansion)
-
-- Replace demo in-memory auth with DB-backed hashed passwords
-- Implement full CRUD for all modules (products, orders, deliveries, payments, reports)
-- Add pagination/filtering on list APIs
-- Add robust request validation and audit logging
-- Expand RBAC to DB-backed permission checks
-
+- This phase focuses on **scaffolding and database foundation**.
+- Passwords are seeded as plain values for demo-only development.
+- Phase 2 can extend this scaffold with complete CRUD, validation layers, pagination/filtering, transactional stock movement logic, and report endpoints.

@@ -1,7 +1,6 @@
-export const errorHandler = (err, req, res, next) => {
-  console.error(err);
-  if (res.headersSent) return next(err);
-  return res.status(err.status || 500).json({
-    message: err.message || 'Internal server error',
+module.exports = (err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
+  res.status(statusCode).json({
+    message: err.message || 'Internal server error'
   });
 };
