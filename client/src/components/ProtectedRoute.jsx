@@ -1,7 +1,14 @@
-import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Navigate, useLocation } from 'react-router-dom';
 
-export default function ProtectedRoute() {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
-}
+const ProtectedRoute = ({ children }) => {
+  const location = useLocation();
+  const token = localStorage.getItem('ims_token');
+
+  if (!token) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+
+  return children;
+};
+
+export default ProtectedRoute;

@@ -1,40 +1,25 @@
-import { useEffect, useState } from 'react';
-import axiosClient from '../api/axiosClient';
-import { MODULES } from '../config/modules';
-import LoadingSpinner from '../components/ui/LoadingSpinner';
+const cards = [
+  { title: 'Total Products', value: '1,240' },
+  { title: 'Low Stock Items', value: '38' },
+  { title: 'Open Purchase Orders', value: '14' },
+  { title: 'Pending Deliveries', value: '11' }
+];
 
-export default function DashboardPage() {
-  const [stats, setStats] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadDashboard() {
-      try {
-        const { data } = await axiosClient.get('/dashboard/summary');
-        setStats(data.cards || []);
-      } catch {
-        setStats(MODULES.slice(0, 6).map((module) => ({ title: module.label, value: '-' })));
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadDashboard();
-  }, []);
-
-  if (loading) return <LoadingSpinner label="Loading dashboard insights..." />;
-
+const DashboardPage = () => {
   return (
-    <section>
+    <div>
       <h2>Dashboard</h2>
+      <p>Overview of inventory, purchases, and sales operations.</p>
       <div className="cards-grid">
-        {stats.map((card) => (
-          <article className="summary-card" key={card.title}>
-            <p>{card.title}</p>
-            <h3>{card.value}</h3>
+        {cards.map((card) => (
+          <article className="card" key={card.title}>
+            <h3>{card.title}</h3>
+            <p>{card.value}</p>
           </article>
         ))}
       </div>
-    </section>
+    </div>
   );
-}
+};
+
+export default DashboardPage;

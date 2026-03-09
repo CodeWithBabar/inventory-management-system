@@ -1,46 +1,43 @@
 import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-export default function LoginPage() {
-  const { login, loading, isAuthenticated } = useAuth();
-  const [form, setForm] = useState({ email: '', password: '' });
-  const [errors, setErrors] = useState({});
+const LoginPage = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = location.state?.from?.pathname || '/';
+  const [form, setForm] = useState({ email: 'admin@ims.local', password: 'Admin@123' });
 
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  const validate = () => {
-    const nextErrors = {};
-    if (!form.email) nextErrors.email = 'Email is required';
-    if (!form.password) nextErrors.password = 'Password is required';
-    setErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
-  };
-
-  const handleSubmit = async (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
-    if (!validate()) return;
-    await login(form);
+    localStorage.setItem('ims_token', 'demo-token');
+    navigate(redirectTo, { replace: true });
   };
 
   return (
     <div className="auth-page">
       <form className="auth-card" onSubmit={handleSubmit}>
         <h1>Sign in</h1>
-        <p>Access the Inventory Management admin portal.</p>
+        <p>Use demo credentials to access the admin panel.</p>
         <label htmlFor="email">Email</label>
-        <input id="email" type="email" value={form.email} onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))} />
-        {errors.email && <small className="error-text">{errors.email}</small>}
-
+        <input
+          id="email"
+          type="email"
+          value={form.email}
+          onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
+          required
+        />
         <label htmlFor="password">Password</label>
-        <input id="password" type="password" value={form.password} onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))} />
-        {errors.password && <small className="error-text">{errors.password}</small>}
-
-        <button type="submit" className="btn btn-primary" disabled={loading}>{loading ? 'Signing in...' : 'Login'}</button>
-        <small className="hint">Demo: admin@ims.local / Admin@123</small>
+        <input
+          id="password"
+          type="password"
+          value={form.password}
+          onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
+          required
+        />
+        <button type="submit">Login</button>
       </form>
     </div>
   );
-}
+};
+
+export default LoginPage;
